@@ -2,6 +2,11 @@
 
 A C# + WPF application for managing product data and sales records, developed as a university course project.
 
+## Available Languages
+- [English](README.md)
+- [Русский](README.ru.md)
+- [中文](README.zh.md)
+
 ## Features
 
 ### Product and Sales Management
