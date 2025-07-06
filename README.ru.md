@@ -57,7 +57,7 @@ FUR-30067;2;Анна;17.03.2021
 1. Клонировать репозиторий:
   ```
   bash
-  git clone https://github.com/ваш_логин/управление-товарами.git
+  git clone https://github.com/your-username/Course-project--Reference-book-handler.git
   ```
 2. Открыть решение в Visual Studio
 3. Собрать и запустить проект
