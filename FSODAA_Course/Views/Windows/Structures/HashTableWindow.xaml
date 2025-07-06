@@ -1,0 +1,109 @@
+﻿<Window x:Class="FSODAA_Course.Views.Windows.Structures.HashTableWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:FSODAA_Course"
+        mc:Ignorable="d"
+        Title="HashTableWindow" Height="500" Width="900">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Toolbar -->
+            <RowDefinition Height="*"/>
+            <!-- Content -->
+        </Grid.RowDefinitions>
+
+        <!-- Toolbar -->
+        <ToolBarTray Grid.Row="0">
+            <ToolBar>
+                <Button x:Name="ViewFullHashTable" Content="Отобразить"
+                        Click="ViewHashTable_Click"/>
+                <Separator/>
+                <Button x:Name="SearchHashTable" Content="Поиск"
+                        Click="SearchHashTable_Click"/>
+                <Separator/>
+                <Button x:Name="AddHashTable" Content="Добавить"
+                        Click="AddHashTable_Click"/>
+                <Separator/>
+                <!-- Добавить с файла -->
+                <Button x:Name="InitializeHashFromFile" Content="Добавить с файла"
+                    ToolTip="Добавить элемент в дерево"
+                    Click="InitializeHashFromFile_Click"/>
+                <Separator/>
+                <Button x:Name="DeleteHashTable" Content="Удалить"
+                    ToolTip="Удалить элемент из ХТ"
+                    Click="DeleteHashTable_Click">
+                    <!--<StackPanel Orientation="Horizontal">
+                        <Image Source="Resource/img/cancel.png" Width="16" Height="16"/>
+                        <TextBlock Text="Удалить" Margin="3,0,0,0"/>
+                    </StackPanel>-->
+                </Button>
+            </ToolBar>
+        </ToolBarTray>
+
+        <!-- Основной контент -->
+        <Grid Grid.Row="1" Margin="0,10,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <!-- Оригинальная таблица -->
+                <ColumnDefinition Width="3"/>
+                <!-- Разделитель -->
+                <ColumnDefinition Width="3*"/>
+                <!-- Результаты поиска -->
+            </Grid.ColumnDefinitions>
+
+            <!-- Слева: оригинальная HashDataGrid -->
+            <DataGrid x:Name="HashDataGrid"
+                      Grid.Column="0"
+                      AutoGenerateColumns="True"
+                      IsReadOnly="True"
+                      LoadingRow="HashDataGrid_LoadingRow"
+                      FontFamily="Consolas"
+                      FontSize="12"
+                      HorizontalAlignment="Stretch"
+                      VerticalAlignment="Stretch"/>
+
+            <!-- Разделитель -->
+            <GridSplitter Grid.Column="1"
+                          Width="3"
+                          HorizontalAlignment="Stretch"
+                          VerticalAlignment="Stretch"
+                          Background="Gray"
+                          ShowsPreview="True"/>
+
+            <!-- Справа: результаты поиска -->
+            <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="5">
+                    <!-- Заголовок для Goods -->
+                    <TextBlock Text="Найденный товар (Goods):"
+                               FontWeight="Bold"
+                               FontSize="14"
+                               Margin="0,0,0,5"/>
+
+                    <!-- Отображение одного товара -->
+                    <StackPanel x:Name="GoodsPanel" Margin="0,0,0,10">
+                        <TextBlock Text="{Binding Article}"/>
+                        <TextBlock Text="{Binding Name}"/>
+                        <TextBlock Text="{Binding Price, StringFormat=C}"/>
+                    </StackPanel>
+
+                    <!-- Заголовок для Sales -->
+                    <TextBlock Text="Связанные продажи (Sales):"
+                               FontWeight="Bold"
+                               FontSize="14"
+                               Margin="0,10,0,5"/>
+
+                    <!-- DataGrid для списка Sales -->
+                    <DataGrid x:Name="SalesDataGrid"
+                              AutoGenerateColumns="True"
+                              IsReadOnly="True"
+                              FontFamily="Consolas"
+                              FontSize="12"
+                              HorizontalAlignment="Stretch"
+                              VerticalAlignment="Stretch"/>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</Window>
