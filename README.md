@@ -58,7 +58,7 @@ FUR-30067;2;Anna;17.03.2021
 1. Clone repository:
   ```
   bash
-  git clone https://github.com/your-username/product-management.git
+  git clone https://github.com/your-username/Course-project--Reference-book-handler.git
   ```
 2. Open solution in Visual Studio
 3. Build and run the project
