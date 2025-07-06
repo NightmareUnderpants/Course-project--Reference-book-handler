@@ -64,7 +64,7 @@ FUR-30067;2;Anna;17.03.2021
 3. Build and run the project
 
 ## Screenshots
-(Add application screenshots here)
+![Full programm inteface](screenshot.png)
 
 ## License
 MIT
