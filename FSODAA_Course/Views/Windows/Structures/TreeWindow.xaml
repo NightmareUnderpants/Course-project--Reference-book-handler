@@ -17,35 +17,42 @@
                 <ToolBar>
                     <Separator/>
                     <!-- Отобразить -->
-                    <Button x:Name="ViewFullTree" Content="Отобразить"
+                    <Button x:Name="ViewFullTreeButton" Content="Отобразить"
                             ToolTip="Отобразить полное дерево"
                             Click="ViewFullTree_Click">
                         
                     </Button>
                     <Separator/>
                     <!-- Поиск -->
-                    <Button x:Name="SearchTree" Content="Поиск"
+                    <Button x:Name="SearchTreeButton" Content="Поиск"
                             ToolTip="Поиск по ключу в дереве"
                             Click="SearchTree_Click">
                         
                     </Button>
                     <Separator/>
                     <!-- Добавить -->
-                    <Button x:Name="AddTreeNode" Content="Добавить"
+                    <Button x:Name="AddTreeNodeButton" Content="Добавить"
                             ToolTip="Добавить элемент в дерево"
                             Click="AddTreeNode_Click">
                         
                     </Button>
                     <Separator/>
                     <!-- Добавить с файла -->
-                    <Button x:Name="InitializeTreeNodeFromFile" Content="Добавить с файла"
-                            ToolTip="Добавить элемент в дерево"
+                    <Button x:Name="InitializeTreeNodeFromFileButton" Content="Добавить с файла"
+                            ToolTip="Добавить данные в дерево с файла"
                             Click="InitializeTreeNodeFromFile_Click">
                         
                     </Button>
                     <Separator/>
+                    <!-- Добавить с файла -->
+                    <Button x:Name="SaveTreeNodeToFileButton" Content="Сохранить в файл"
+                            ToolTip="Сохранить дерево в файл"
+                            Click="SaveTreeNodeToFile_Click">
+                        
+                    </Button>
+                    <Separator/>
                     <!-- Удалить -->
-                    <Button x:Name="DeleteHashTable" Content="Удалить"
+                    <Button x:Name="DeleteHashTableButton" Content="Удалить"
                             ToolTip="Удалить элемент из дерева"
                             Click="DeleteHashTable_Click">
                     </Button>

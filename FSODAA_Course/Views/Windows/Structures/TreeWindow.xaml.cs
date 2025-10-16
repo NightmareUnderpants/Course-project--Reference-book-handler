@@ -19,11 +19,24 @@ namespace FSODAA_Course.Views.Windows.Structures
         }
 
         private void ViewFullTree_Click(object sender, EventArgs e)
-        {
-            TreeDisplay.Text = _treeDate.Display();
-        }
+            => TreeDisplay.Text = _treeDate.Display();
 
         private void SearchTree_Click(object sender, RoutedEventArgs e)
+            => SearchTree();
+
+        private void DeleteHashTable_Click(object sender, RoutedEventArgs e)
+            => DeleteHashTable();
+
+        private void AddTreeNode_Click(object sender, RoutedEventArgs e)
+            => AddTreeNode();
+
+        private void InitializeTreeNodeFromFile_Click(object sender, RoutedEventArgs e)
+            => InitializeTreeFromFile();
+
+        private void SaveTreeNodeToFile_Click(object sender, RoutedEventArgs e)
+            => SaveTreeNodeToFile();
+
+        private void SearchTree()
         {
             try
             {
@@ -57,7 +70,7 @@ namespace FSODAA_Course.Views.Windows.Structures
             }
         }
 
-        private void AddTreeNode_Click(object sender, RoutedEventArgs e)
+        private void AddTreeNode()
         {
             try
             {
@@ -100,7 +113,7 @@ namespace FSODAA_Course.Views.Windows.Structures
             }
         }
 
-        private void DeleteHashTable_Click(object sender, RoutedEventArgs e)
+        private void DeleteHashTable()
         {
             try
             {
@@ -132,11 +145,6 @@ namespace FSODAA_Course.Views.Windows.Structures
                 MessageBox.Show($"Ошибка загрузки: {ex.Message}", "Ошибка",
                                MessageBoxButton.OK, MessageBoxImage.Error);
             }
-        }
-
-        private void InitializeTreeNodeFromFile_Click(object sender, RoutedEventArgs e)
-        {
-            InitializeTreeFromFile();
         }
 
         private void InitializeTreeFromFile()
@@ -193,6 +201,37 @@ namespace FSODAA_Course.Views.Windows.Structures
             {
                 MessageBox.Show($"Ошибка загрузки: {ex.Message}", "Ошибка",
                                MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void SaveTreeNodeToFile()
+        {
+            try
+            {
+                int total = _treeDate.Count;
+                if (total == 0)
+                {
+                    MessageBox.Show("В дереве нет записей для сохранения.", "Информация",
+                                    MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                var buffer = new Sales[total];
+                _treeDate.CopyTo(buffer, 0);
+
+                var allSales = new Vector<Sales>();
+                for (int i = 0; i < buffer.Length; i++)
+                    allSales.Add(buffer[i]);
+
+                FileHandler.SaveSalesToFile("SalesSave.txt", allSales);
+
+                MessageBox.Show($"Успешно сохранено {allSales.Count} записей в файл SalesSave.txt.", "Успех",
+                                MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка сохранения: {ex.Message}", "Ошибка",
+                                MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

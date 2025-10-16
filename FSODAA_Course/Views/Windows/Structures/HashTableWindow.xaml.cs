@@ -29,16 +29,38 @@ namespace FSODAA_Course.Views.Windows.Structures
         }
 
         private void ViewHashTable_Click(object sender, RoutedEventArgs e)
-        {
-            // Обновляем отображение
-            UpdateHashTableView();
-        }
+            => UpdateHashTableView();
 
         private void InitializeHashFromFile_Click(object sender, RoutedEventArgs e)
+            => InitializeHashFromFile();
+
+        private void SaveHashToFile_Click(object sender, RoutedEventArgs e)
+            => SaveHashToFile();
+
+        private void SearchHashTable_Click(object sender, RoutedEventArgs e)
+            => SearchHashTable();
+
+        private void AddHashTable_Click(object sender, RoutedEventArgs e)
+            => AddHashTable();
+
+        private void DeleteHashTable_Click(object sender, RoutedEventArgs e)
+            => DeleteHashTable();
+
+        private void HashDataGrid_LoadingRow(object sender, DataGridRowEventArgs e)
+            => HashDataGrid_LoadingRowHandler(e);
+
+        private void HashTableWindow_Closing(object? sender, CancelEventArgs e)
+            => HashTableWindow_ClosingHandler(e);
+
+        #region Implementation Methods
+        private void InitializeHashFromFile()
         {
             try
             {
                 Vector<Goods> goods = FileHandler.ReadGoodsFromFile("TestGoods.txt");
+
+                Console.WriteLine($"Initialize HashTable From File\n");
+
                 int count = 0;
                 for (int i = 0; i < goods.Count; i++)
                 {
@@ -57,9 +79,33 @@ namespace FSODAA_Course.Views.Windows.Structures
                 MessageBox.Show($"Ошибка загрузки: {ex.Message}", "Ошибка",
                                MessageBoxButton.OK, MessageBoxImage.Error);
             }
-        }       
+        }
 
-        private void SearchHashTable_Click(object sender, RoutedEventArgs e)
+        private void SaveHashToFile()
+        {
+            try
+            {
+                var hashTableVector = _hashTableSales.HashTableToVector();
+                if (hashTableVector == null)
+                {
+                    MessageBox.Show("Не удалось обратиться к ХТ.", "Ошибка",
+                                    MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                FileHandler.SaveToFile("SalesGoods.txt", hashTableVector);
+
+                MessageBox.Show($"Успешно сохранено {hashTableVector.Count} записей в файл SalesSave.txt.", "Успех",
+                                MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка сохранения: {ex.Message}", "Ошибка",
+                                MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void SearchHashTable()
         {
             Article article = new Article();
 
@@ -85,7 +131,7 @@ namespace FSODAA_Course.Views.Windows.Structures
                 MessageBox.Show("Vector is empty!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
-        private void AddHashTable_Click(object sender, RoutedEventArgs e)
+        private void AddHashTable()
         {
             try
             {
@@ -111,7 +157,7 @@ namespace FSODAA_Course.Views.Windows.Structures
             }
         }
 
-        private void DeleteHashTable_Click(object sender, RoutedEventArgs e)
+        private void DeleteHashTable()
         {
             try
             {
@@ -141,9 +187,7 @@ namespace FSODAA_Course.Views.Windows.Structures
                 var treeDate = main.treeDate;
 
                 treeDate.RemoveSalesByArticleAcrossAllDates(goods.Article);
-
                 treeDate.RemoveEmptyNodes();
-
                 UpdateHashTableView();
 
                 MessageBox.Show($"Успешно удалена запись", "Успех",
@@ -161,7 +205,6 @@ namespace FSODAA_Course.Views.Windows.Structures
             Vector<HashTable.Hash> vector = _hashTableSales.HashTableToVector();
 
             var items = new List<HashTable.Hash>();
-
             for (int i = 0; i < vector.Count; i++)
             {
                 items.Add(vector[i]);
@@ -170,10 +213,16 @@ namespace FSODAA_Course.Views.Windows.Structures
             HashDataGrid.ItemsSource = items;
         }
 
-        private void HashDataGrid_LoadingRow(object sender, DataGridRowEventArgs e)
+        private void HashDataGrid_LoadingRowHandler(DataGridRowEventArgs e)
         {
             // Присваиваем индекс строки (начиная с 1)
             e.Row.Header = (e.Row.GetIndex() + 1).ToString();
+        }
+
+        private void HashTableWindow_ClosingHandler(CancelEventArgs e)
+        {
+            e.Cancel = true;
+            this.Hide();
         }
 
         private bool TryParseArticle(out Article article)
@@ -208,11 +257,6 @@ namespace FSODAA_Course.Views.Windows.Structures
 
             return true;
         }
-
-        private void HashTableWindow_Closing(object? sender, CancelEventArgs e)
-        {
-            e.Cancel = true;
-            this.Hide();
-        }
+        #endregion
     }
 }

@@ -17,21 +17,25 @@
         <!-- Toolbar -->
         <ToolBarTray Grid.Row="0">
             <ToolBar>
-                <Button x:Name="ViewFullHashTable" Content="Отобразить"
+                <Button x:Name="ViewFullHashTableButton" Content="Отобразить"
                         Click="ViewHashTable_Click"/>
                 <Separator/>
-                <Button x:Name="SearchHashTable" Content="Поиск"
+                <Button x:Name="SearchHashTableButton" Content="Поиск"
                         Click="SearchHashTable_Click"/>
                 <Separator/>
-                <Button x:Name="AddHashTable" Content="Добавить"
+                <Button x:Name="AddHashTableButton" Content="Добавить"
                         Click="AddHashTable_Click"/>
                 <Separator/>
                 <!-- Добавить с файла -->
-                <Button x:Name="InitializeHashFromFile" Content="Добавить с файла"
-                    ToolTip="Добавить элемент в дерево"
+                <Button x:Name="InitializeHashFromFileButton" Content="Добавить с файла"
+                    ToolTip="Добавить элементы из файла в ХТ"
                     Click="InitializeHashFromFile_Click"/>
                 <Separator/>
-                <Button x:Name="DeleteHashTable" Content="Удалить"
+                <Button x:Name="SaveHashToFileButton" Content="Сохранить в файл"
+                    ToolTip="Сохранить элементы ХТ в файл"
+                    Click="SaveHashToFile_Click"/>
+                <Separator/>
+                <Button x:Name="DeleteHashTableButton" Content="Удалить"
                     ToolTip="Удалить элемент из ХТ"
                     Click="DeleteHashTable_Click">
                     <!--<StackPanel Orientation="Horizontal">

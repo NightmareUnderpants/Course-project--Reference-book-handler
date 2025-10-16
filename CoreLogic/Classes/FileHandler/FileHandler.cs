@@ -61,8 +61,10 @@ namespace CoreLogic.FileHandler
         public static Vector<Goods> ReadGoodsFromFile(string fileName) =>
             ReadFromFile(fileName, StringHandler.StringToGoods);
 
-        private static void SaveToFile<T>(string fileName, Vector<T> items)
+        public static void SaveToFile<T>(string fileName, Vector<T> items)
         {
+            Console.WriteLine($"SaveToFile: fileName={fileName}, items={items.GetType()}\n");
+
             string path = Path.Combine(GetDesktopPath(), fileName);
             Directory.CreateDirectory(Path.GetDirectoryName(path));
 
@@ -71,6 +73,7 @@ namespace CoreLogic.FileHandler
             for (int i = 0; i < items.Count; i++)
             {
                 lines[i] = items[i].ToString();
+                Console.WriteLine($"{items[i].ToString()}");
             }
 
             File.WriteAllLines(path, lines);
