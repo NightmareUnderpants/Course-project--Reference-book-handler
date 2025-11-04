@@ -56,6 +56,11 @@
                             ToolTip="Удалить элемент из дерева"
                             Click="DeleteHashTable_Click">
                     </Button>
+                    <Separator/>
+                    <!-- Внутри ToolBar -->
+                    <Button x:Name="GenerateReportButton" Content="Формирование отчёта"
+                            Click="GenerateReport_Click"/>
+                    <Separator/>
                 </ToolBar>
             </ToolBarTray>
         </Grid>

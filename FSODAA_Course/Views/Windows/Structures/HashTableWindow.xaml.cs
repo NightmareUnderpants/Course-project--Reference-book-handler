@@ -19,6 +19,9 @@ namespace FSODAA_Course.Views.Windows.Structures
         private HashTable _hashTableSales = new HashTable(10);
         private Tree<Article> _articleTree = new Tree<Article>();
 
+        private int _windowInputWidth = 300;
+        private int _windowInputHeight = 150;
+
         public HashTableWindow(HashTable hashTable, Tree<Article> articleTree)
         {
             InitializeComponent();
@@ -26,6 +29,9 @@ namespace FSODAA_Course.Views.Windows.Structures
 
             _hashTableSales = hashTable;
             _articleTree = articleTree;
+
+            // Отображение сразу после инициализации
+            UpdateHashTableView();
         }
 
         private void ViewHashTable_Click(object sender, RoutedEventArgs e)
@@ -71,6 +77,8 @@ namespace FSODAA_Course.Views.Windows.Structures
                     }
                 }
 
+                UpdateHashTableView(); // Отображение после инициализации
+
                 MessageBox.Show($"Успешно загружено {count} записей", "Успех",
                                 MessageBoxButton.OK, MessageBoxImage.Information);
             }
@@ -113,7 +121,13 @@ namespace FSODAA_Course.Views.Windows.Structures
                 return;
 
             if (!Search.SearchByArticle(_hashTableSales, _articleTree, article, out Goods goods, out Vector<Sales> salesVector))
+            {
+                MessageBox.Show($"Товар с артикулом {article} не найден.", "Не найдено",
+                                MessageBoxButton.OK, MessageBoxImage.Warning);
+                GoodsPanel.DataContext = null;
+                SalesDataGrid.ItemsSource = null;
                 return;
+            }
 
             GoodsPanel.DataContext = goods;
 
@@ -172,8 +186,8 @@ namespace FSODAA_Course.Views.Windows.Structures
                 }
                 else
                 {
-                    MessageBox.Show($"Ошибка удаления: не удалось удалить из ХТ", "Ошибка",
-                               MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"Товар с артикулом {goods.Article} не найден для удаления.", "Не найдено",
+                                    MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
@@ -230,6 +244,9 @@ namespace FSODAA_Course.Views.Windows.Structures
             article = new Article();
 
             var dlg = new UnputMessage("Введите Артикул (OTH-99999):") { Owner = this };
+            dlg.Width = _windowInputWidth;
+            dlg.Height = _windowInputHeight;
+
             if (dlg.ShowDialog() != true)
                 return false;
 
@@ -248,6 +265,9 @@ namespace FSODAA_Course.Views.Windows.Structures
             goods = new Goods();
 
             var dlg = new UnputMessage("Введите Товар (OTH-99999;Name;Price):") { Owner = this };
+            dlg.Width = _windowInputWidth;
+            dlg.Height = _windowInputHeight;
+
             if (dlg.ShowDialog() != true)
                 return false;
 
