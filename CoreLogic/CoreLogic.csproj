@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Classes\CircularLinkedList.cs" />
     <Compile Include="Classes\FileHandler\FileHandler.cs" />
     <Compile Include="Classes\FileHandler\StringHandler.cs" />
     <Compile Include="Classes\FileHandler\GenerateData.cs" />

@@ -9,73 +9,73 @@ namespace CoreLogic.Classes
     {
         /// <summary>
         /// Ищет товар и список продаж по артикулу.
-        /// Возвращает true, если хотя бы в хеш-таблице он найден.
+        /// Возвращает true, если товар найден в хеш-таблице.
         /// </summary>
-        public static bool SearchByArticle(in HashTable hashTable, in Tree<Article> tree,
-            Article article, out Goods goods, out Vector<Sales> salesVector)
+        public static bool SearchByArticle(
+            HashTable hashTable,
+            Tree<Article> articleTree,
+            Article article,
+            out Goods goods,
+            out Vector<Sales> salesVector)
         {
-            // Поиск в хеш-таблице
-            if (!hashTable.Find(article, out var foundGoods, out int steps))
+            goods = default;
+            salesVector = new Vector<Sales>();
+
+            // 1. Поиск товара в ХЕШ-ТАБЛИЦЕ (получаем ССЫЛКУ на узел)
+            if (!hashTable.Find(article, out CircularLinkedList<Goods>.Node goodsNodeRef))
             {
-                Debug.WriteLine($"Warning: Article: {article} not found in HashTable (after {steps} probes)");
-                goods = default;
-                salesVector = default;
+                Debug.WriteLine($"Warning: Article {article} not found in HashTable");
                 return false;
             }
 
-            // Заполняем выходной параметр
-            goods = foundGoods;
+            // 2. Получаем сам объект Goods из ссылки
+            goods = goodsNodeRef.Value;
 
-            // Поиск в дереве
-            if (!TrySearchArticleInTree(tree, article, out var articleVector))
+            // 3. Поиск продаж в ДЕРЕВЕ СТАТЕЙ
+            var salesNodeReferences = articleTree.GetNodeReferences(article);
+
+            // 4. Конвертируем ссылки в вектор значений Sales
+            salesVector = new Vector<Sales>();
+            for (int i = 0; i < salesNodeReferences.Count; i++)
             {
-                Debug.WriteLine($"Warning: Article: {article} not found in Tree");
-                salesVector = new Vector<Sales>();  // или default, по вашему усмотрению
-            }
-            else
-            {
-                salesVector = articleVector;
+                if (salesNodeReferences[i] != null)
+                {
+                    salesVector.Add(salesNodeReferences[i].Value);
+                }
             }
 
             return true;
         }
 
-        public static void SearchByDate(in Tree<Date> tree, Date date, out Vector<Sales> salesVector)
+        /// <summary>
+        /// Ищет все продажи по дате в дереве дат.
+        /// </summary>
+        public static void SearchByDate(
+            Tree<Date> dateTree,
+            Date date,
+            out Vector<Sales> salesVector)
         {
             salesVector = new Vector<Sales>();
 
             try
             {
-                int indexSales = tree.IndexOf(date);
-                if (indexSales == -1)
-                {
-                    salesVector = new Vector<Sales>();
-                    return;
-                }
+                // 1. Получаем ССЫЛКИ на узлы продаж по дате
+                var salesNodeReferences = dateTree.GetNodeReferences(date);
 
-                salesVector = tree[date];
+                // 2. Конвертируем ссылки в вектор значений Sales
+                for (int i = 0; i < salesNodeReferences.Count; i++)
+                {
+                    if (salesNodeReferences[i] != null)
+                    {
+                        salesVector.Add(salesNodeReferences[i].Value);
+                    }
+                }
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Ошибка при поиске: {ex.Message}", "Ошибка");
+                Debug.WriteLine($"Ошибка при поиске по дате {date}: {ex.Message}");
                 salesVector = new Vector<Sales>();
             }
-        }
-
-
-        private static bool TrySearchArticleInTree(Tree<Article> tree, Article article, out Vector<Sales> vectorArticle)
-        {
-            // Получаем индекс; IndexOf сейчас возвращает -1, если нет
-            int idx = tree.IndexOf(article);
-            if (idx < 0)
-            {
-                vectorArticle = default;
-                return false;
-            }
-
-            // Обращаемся по ключу — здесь бросится, только если дерево пустое
-            vectorArticle = tree[article];
-            return true;
         }
     }
 }

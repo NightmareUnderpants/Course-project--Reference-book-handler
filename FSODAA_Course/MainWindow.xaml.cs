@@ -7,21 +7,28 @@ namespace FSODAA_Course
 {
     public partial class MainWindow : Window
     {
-        // Tree with Date
-        public Tree<Date> treeDate = new Tree<Date>();
+        // Единые списки-хранилища для всех данных
+        private readonly CircularLinkedList<Goods> _goods = new CircularLinkedList<Goods>();
+        private readonly CircularLinkedList<Sales> _sales = new CircularLinkedList<Sales>();
 
-        // HashTable&Tree with Article
-        public HashTable hashTableSales = new HashTable(10);
-        public Tree<Article> articleTree = new Tree<Article>();
+        // Структуры данных для индексации (работают со ссылками!)
+        public HashTable hashTableGoods;
+        public Tree<Article> articleTree;
+        public Tree<Date> treeDate;
 
         public MainWindow()
         {
             InitializeComponent();
+
+            // Инициализация структур с передачей ссылок на списки
+            hashTableGoods = new HashTable(10);
+            articleTree = new Tree<Article>();
+            treeDate = new Tree<Date>();
         }
 
         private void OpenHashTableWindow_Click(object sender, RoutedEventArgs e)
         {
-            var win = new HashTableWindow(hashTableSales, articleTree)
+            var win = new HashTableWindow(hashTableGoods, articleTree, _goods)
             {
                 Owner = this
             };
@@ -30,7 +37,7 @@ namespace FSODAA_Course
 
         private void OpenTreeWindow_Click(object sender, RoutedEventArgs e)
         {
-            var win = new TreeWindow(treeDate)
+            var win = new TreeWindow(treeDate, _sales)
             {
                 Owner = this
             };
