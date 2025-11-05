@@ -70,15 +70,11 @@ namespace CoreLogic.Classes
             if (IsEmpty)
             {
                 _tail = newNode;
-                // newNode.Next уже указывает сам на себя
             }
             else
             {
-                // 1. Новый узел должен указывать туда же, куда указывал старый _tail (т.е. на голову)
                 newNode.Next = _tail.Next;
-                // 2. Старый _tail теперь указывает на новый узел
                 _tail.Next = newNode;
-                // 3. Новый узел становится новым _tail
                 _tail = newNode;
             }
 
