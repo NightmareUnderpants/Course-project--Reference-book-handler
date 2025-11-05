@@ -10,18 +10,19 @@ namespace FSODAA_Course.Views.Windows.Structures
 {
     public partial class TreeWindow : Window
     {
-        private Tree<Date> _treeDate = new Tree<Date>();
-
         private int _windowInputWidth = 300;
         private int _windowInputHeight = 150;
-        public TreeWindow(Tree<Date> treeDate)
+
+        private Tree<Date> _treeDate;
+        private CircularLinkedList<Sales> _sales;
+
+        public TreeWindow(Tree<Date> treeDate, CircularLinkedList<Sales> allSales)
         {
             InitializeComponent();
             this.Closing += TreeWindow_Closing;
-            _treeDate = treeDate;
 
-            // Отображение сразу после инициализации
-            TreeDisplay.Text = _treeDate.Display();
+            _treeDate = treeDate;
+            _sales = allSales;
         }
 
         private void ViewFullTree_Click(object sender, EventArgs e)
@@ -115,8 +116,10 @@ namespace FSODAA_Course.Views.Windows.Structures
                     }
                 }
 
-                _treeDate.Add(sales.Date, sales);
-                TreeDisplay.Text = _treeDate.Display(); // Обновляем отображение после добавления
+                var salesNode = _sales.AddLastAndGetNode(sales);
+
+                _treeDate.Add(sales.Date, salesNode);
+                TreeDisplay.Text = _treeDate.Display();
             }
             catch (Exception ex)
             {
@@ -132,56 +135,50 @@ namespace FSODAA_Course.Views.Windows.Structures
                 if (!TryParseSales(out Sales sales))
                     return;
 
-                var main = Owner as MainWindow;
-                if (main == null)
-                {
-                    MessageBox.Show("Главное окно не найдено.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
-                var articleTree = main.articleTree;
+                var salesReferences = _treeDate.GetNodeReferences(sales.Date);
+                CircularLinkedList<Sales>.Node targetNodeRef = null;
 
-                if (articleTree[sales.Article] == null)
+                for (int i = 0; i < salesReferences.Count; i++)
                 {
-                    MessageBox.Show("По заданному артиклу не удалось найти запись.", "Предупреждение!", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-
-                // Проверяем, существует ли узел с такой датой и продажа в нём перед удалением
-                if (!_treeDate.Contains(sales.Date))
-                {
-                    // Возвращаем предупреждение, если элемент (дата) не найден
-                    MessageBox.Show($"Узел с датой {sales.Date} не найден в дереве.", "Не найдено", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-
-                // Проверим, есть ли конкретная продажа в векторе
-                var salesOnDate = _treeDate[sales.Date];
-                bool saleFound = false;
-                for (int i = 0; i < salesOnDate.Count; i++)
-                {
-                    if (salesOnDate[i].Equals(sales))
+                    if (salesReferences[i]?.Value.Equals(sales) == true)
                     {
-                        saleFound = true;
+                        targetNodeRef = salesReferences[i];
                         break;
                     }
                 }
 
-                if (!saleFound)
+                if (targetNodeRef == null)
                 {
-                    // Возвращаем предупреждение, если конкретная продажа не найдена
-                    MessageBox.Show($"Продажа {sales} не найдена в узле с датой {sales.Date}.", "Не найдено", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show($"Продажа {sales} не найдена в узле с датой {sales.Date}.", "Не найдено",
+                                   MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
-                _treeDate.RemoveExactSalesAtDate(sales.Date, sales);
-                if (_treeDate[sales.Date].Count == 0)
-                    _treeDate.Remove(sales.Date);
+                // 3. Удаляем ССЫЛКУ из дерева дат
+                if (_treeDate.RemoveExactNodeReferenceAtDate(sales.Date, targetNodeRef))
+                {
+                    // 4. Удаляем САМУ ПРОДАЖУ из общего списка
+                    _sales.Remove(targetNodeRef.Value);
 
-                TreeDisplay.Text = _treeDate.Display(); // Обновляем отображение после удаления
+                    // 5. Если узел даты стал пустым, удаляем его из дерева
+                    if (_treeDate.GetNodeReferences(sales.Date).Count == 0)
+                    {
+                        _treeDate.Remove(sales.Date);
+                    }
+
+                    TreeDisplay.Text = _treeDate.Display();
+                    MessageBox.Show($"Успешно удалена продажа", "Успех",
+                                   MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else
+                {
+                    MessageBox.Show($"Ошибка при удалении продажи из дерева.", "Ошибка",
+                                   MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка загрузки: {ex.Message}", "Ошибка",
+                MessageBox.Show($"Ошибка удаления: {ex.Message}", "Ошибка",
                                MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -196,44 +193,49 @@ namespace FSODAA_Course.Views.Windows.Structures
                     MessageBox.Show("Главное окно не найдено.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
-                var articleTree = main.articleTree;
 
-                Vector<Sales> sales = FileHandler.ReadSalesFromFile("TestSales.txt");
+                CircularLinkedList<Sales> salesFromFile = FileHandler.ReadSalesFromFile("TestSales.txt");
                 int count = 0;
-                for (int i = 0; i < sales.Count; i++)
+
+                var enumerator = salesFromFile.GetEnumerator();
+                while (enumerator.MoveNext())
                 {
-                    if (articleTree.Contains(sales[i].Article))
+                    Sales currentSale = enumerator.Current;
+
+                    if (!main.articleTree.Contains(currentSale.Article))
                     {
-                        bool exists = false;
-
-                        if (_treeDate.Contains(sales[i].Date))
-                        {
-                            var salesOnDate = _treeDate[sales[i].Date];
-
-                            for (int j = 0; j < salesOnDate.Count; j++)
-                            {
-                                if (salesOnDate[j].Equals(sales[i]))
-                                {
-                                    exists = true;
-                                    break;
-                                }
-                            }
-                        }
-
-                        if (!exists)
-                        {
-                            _treeDate.Add(sales[i].Date, sales[i]);
-                            articleTree.Add(sales[i].Article, sales[i]);
-                            count++;
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine($"WarningLog: {sales[i].Article.ToString()} not exists in Search Tree!");
+                        Console.WriteLine($"WarningLog: {currentSale.Article} not exists in Goods HashTable!");
+                        continue;
                     }
 
+                    bool saleExists = false;
+                    var existingReferences = _treeDate.GetNodeReferences(currentSale.Date);
+
+                    for (int j = 0; j < existingReferences.Count; j++)
+                    {
+                        if (existingReferences[j]?.Value.Equals(currentSale) == true)
+                        {
+                            saleExists = true;
+                            break;
+                        }
+                    }
+
+                    if (saleExists)
+                    {
+                        Console.WriteLine($"WarningLog: Sale {currentSale} already exists in tree!");
+                        continue;
+                    }
+
+                    var saleNodeRef = _sales.AddLastAndGetNode(currentSale);
+
+                    _treeDate.Add(currentSale.Date, saleNodeRef);
+
+                    main.articleTree.Add(currentSale.Article, saleNodeRef);
+
+                    count++;
                 }
-                TreeDisplay.Text = _treeDate.Display(); // Отображение после инициализации
+
+                TreeDisplay.Text = _treeDate.Display();
                 MessageBox.Show($"Успешно загружено {count} записей", "Успех",
                               MessageBoxButton.OK, MessageBoxImage.Information);
             }
@@ -248,24 +250,9 @@ namespace FSODAA_Course.Views.Windows.Structures
         {
             try
             {
-                int total = _treeDate.Count;
-                if (total == 0)
-                {
-                    MessageBox.Show("В дереве нет записей для сохранения.", "Информация",
-                                    MessageBoxButton.OK, MessageBoxImage.Information);
-                    return;
-                }
+                FileHandler.SaveSalesToFile("SalesSave.txt", _sales);
 
-                var buffer = new Sales[total];
-                _treeDate.CopyTo(buffer, 0);
-
-                var allSales = new Vector<Sales>();
-                for (int i = 0; i < buffer.Length; i++)
-                    allSales.Add(buffer[i]);
-
-                FileHandler.SaveSalesToFile("SalesSave.txt", allSales);
-
-                MessageBox.Show($"Успешно сохранено {allSales.Count} записей в файл SalesSave.txt.", "Успех",
+                MessageBox.Show($"Успешно сохранено {_sales.Count} записей в файл SalesSave.txt.", "Успех",
                                 MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
@@ -283,17 +270,30 @@ namespace FSODAA_Course.Views.Windows.Structures
 
             try
             {
-                // Собираем все продажи из дерева
-                var allSales = new List<Sales>();
-                var buffer = new Sales[_treeDate.Count];
-                _treeDate.CopyTo(buffer, 0);
-                foreach (var sale in buffer)
+                var main = Owner as MainWindow;
+                if (main == null)
                 {
-                    if (!sale.Equals(default(Sales)))
-                        allSales.Add(sale);
+                    MessageBox.Show("Главное окно не найдено.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
                 }
 
-                // Фильтрация по дате
+                // 1. Получаем все продажи из общего списка
+                var allSales = new List<Sales>();
+                var enumerator = _sales.GetEnumerator();
+                while (enumerator.MoveNext())
+                {
+                    if (!enumerator.Current.Equals(default(Sales)))
+                        allSales.Add(enumerator.Current);
+                }
+
+                if (allSales.Count == 0)
+                {
+                    MessageBox.Show("В списке нет продаж для формирования отчёта.", "Информация",
+                                    MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                // 2. Фильтрация по дате
                 var filteredByDate = new List<Sales>();
                 foreach (var sale in allSales)
                 {
@@ -320,7 +320,7 @@ namespace FSODAA_Course.Views.Windows.Structures
                         filteredByDate.Add(sale);
                 }
 
-                // Фильтрация по артикулу
+                // 3. Фильтрация по артикулу
                 var filteredByArticle = new List<Sales>();
                 foreach (var sale in filteredByDate)
                 {
@@ -338,15 +338,14 @@ namespace FSODAA_Course.Views.Windows.Structures
                     }
                 }
 
-                // Фильтрация по продавцу (новый этап)
+                // 4. Фильтрация по продавцу
                 var finalSales = new List<Sales>();
                 foreach (var sale in filteredByArticle)
                 {
-                    // Если указан конкретный продавец, фильтруем по нему
                     if (!string.IsNullOrWhiteSpace(reportSettings.SpecificSeller))
                     {
-                        // Сравниваем без учета регистра и лишних пробелов
-                        if (string.Equals(sale.Cashier?.Trim(),
+                        if (!string.IsNullOrWhiteSpace(sale.Cashier) &&
+                            string.Equals(sale.Cashier.Trim(),
                                          reportSettings.SpecificSeller.Trim(),
                                          StringComparison.OrdinalIgnoreCase))
                         {
@@ -355,7 +354,6 @@ namespace FSODAA_Course.Views.Windows.Structures
                     }
                     else
                     {
-                        // Если продавец не указан, берем все записи
                         finalSales.Add(sale);
                     }
                 }
@@ -367,10 +365,10 @@ namespace FSODAA_Course.Views.Windows.Structures
                     return;
                 }
 
-                // Сортировка по продавцу (если указан конкретный продавец, то записи будут только его)
+                // 5. Сортировка по продавцу
                 finalSales.Sort((x, y) => string.Compare(x.Cashier ?? "", y.Cashier ?? "", StringComparison.Ordinal));
 
-                // Формируем отчёт в строку
+                // 6. Формируем отчёт с данными из Goods
                 var reportLines = new System.Text.StringBuilder();
                 reportLines.AppendLine("Отчёт по продажам");
                 reportLines.AppendLine("==================");
@@ -395,15 +393,25 @@ namespace FSODAA_Course.Views.Windows.Structures
                     reportLines.AppendLine("Продавец: Все");
 
                 reportLines.AppendLine();
-                reportLines.AppendLine("Артикул\t\tКоличество\tПродавец\t\tДата");
-                reportLines.AppendLine("------------------------------------------------------------");
+                reportLines.AppendLine("Артикул\tНазвание\t\tКол-во\tЦена\tПродавец\tДата");
+                reportLines.AppendLine("--------------------------------------------------------------------------------");
 
                 foreach (var sale in finalSales)
                 {
-                    reportLines.AppendLine($"{sale.Article}\t{sale.Count}\t\t{sale.Cashier}\t\t{sale.Date}");
+                    string name = "Не найден";
+                    double price = 0;
+
+                    if (main.hashTableGoods.Find(sale.Article, out var goods))
+                    {
+                        name = goods.Value.Name ?? "Без названия";
+                        price = goods.Value.Price;
+                    }
+
+                    string formattedPrice = price % 1 == 0 ? ((int)price).ToString() : price.ToString("0.##");
+
+                    reportLines.AppendLine($"{sale.Article}\t{name}\t{sale.Count}\t{formattedPrice}\t{sale.Cashier}\t{sale.Date}");
                 }
 
-                // Сохраняем в файл
                 var saveDialog = new Microsoft.Win32.SaveFileDialog
                 {
                     Filter = "Текстовые файлы (*.txt)|*.txt|Все файлы (*.*)|*.*",
