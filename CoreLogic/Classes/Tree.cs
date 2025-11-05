@@ -387,7 +387,11 @@ namespace CoreLogic.Classes
             if (node == null) return string.Empty;
 
             var sb = new StringBuilder();
+
+            // Сначала обрабатываем правое поддерево
             sb.Append(DisplayRecur(node.Right, indent + (isLast ? "    " : "│   "), false));
+
+            // Выводим текущий узел
             sb.Append(indent)
               .Append(isLast ? "└── " : "├── ")
               .Append(node.Key)
@@ -395,7 +399,23 @@ namespace CoreLogic.Classes
               .Append(node.NodeReferences.Count)
               .AppendLine(")");
 
+            // Выводим все Sales в этом узле
+            for (int i = 0; i < node.NodeReferences.Count; i++)
+            {
+                if (node.NodeReferences[i] != null)
+                {
+                    var sale = node.NodeReferences[i].Value;
+                    // Форматируем строку продажи с дополнительным отступом
+                    sb.Append(indent)
+                      .Append(isLast ? "    " : "│   ") // Отступ под текущим узлом
+                      .Append("│   ")                   // Дополнительный отступ для содержимого
+                      .AppendLine(sale.ToString());     // Предполагается, что Sale имеет хороший ToString()
+                }
+            }
+
+            // Затем обрабатываем левое поддерево
             sb.Append(DisplayRecur(node.Left, indent + (isLast ? "    " : "│   "), true));
+
             return sb.ToString();
         }
 
